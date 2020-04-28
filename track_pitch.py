@@ -7,12 +7,9 @@ from weighted_graph import WeightedGraph
 from KalmanFilterHarmonic import KalmanFilterHarmonic as kf
 from GetSpec import GetSpec as GS
 import multiprocessing
-from fxpefac_peak import fxpefac_peak
-from scipy.io import wavfile
-import itertools
-
-
 import time
+
+
 class Timer:
     def __init__(self):
         self.time = time.time()
@@ -162,9 +159,7 @@ def harmonic_track_kalman_filter(list_subset):
                 new_track.update(t, z, z_idx, h, r, w)
                 current_tracks.append([new_track])
 
-
         continue_tracks = global_hypothesis(current_tracks, t)
-
 
         current_tracks = []
         for track in continue_tracks:
