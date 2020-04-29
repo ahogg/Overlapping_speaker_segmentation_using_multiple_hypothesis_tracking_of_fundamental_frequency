@@ -279,12 +279,12 @@ def get_pitch_features(samples, fs):
 
     time.lap('selection')
 
-    possible_tracks_m2 = harmonic_track_kalman_filter(list_subset)
+    possible_tracks = harmonic_track_kalman_filter(list_subset)
 
     time.lap('tracking')
 
     fea = np.zeros((len(fx), 26))
-    for track in possible_tracks_m2:
+    for track in possible_tracks:
         fx = [x[0][0] for x in track.get_past_states()]
         bins = np.linspace(50, 300, 26)
         digitized = np.digitize(fx, bins)
@@ -297,7 +297,7 @@ def get_pitch_features(samples, fs):
 
     outfile_pdf = 'images/TS3003b_mix_headset_snippet.pdf'
     spectrogram = GS()
-    spectrogram.plot_tracks(samples, outfile_pdf, possible_tracks_m2, tx)
+    spectrogram.plot_tracks(samples, outfile_pdf, possible_tracks, tx)
     # spectrogram.plot_all(samples, outfile_pdf, [], [], fx, amp, list_subset, list_allsubset, tx)
 
     time.lap('plot')
@@ -305,8 +305,8 @@ def get_pitch_features(samples, fs):
     return fea
 
 
-s, fs = librosa.load("audio/EN2002a_mix_headset_long_snippet.wav")
-# fs, s = wavfile.read('audio/TS3003b_mix_headset_snippet.wav')
+s, fs = librosa.load("audio/TS3003b_mix_headset_snippet.wav")
+# fs, s = wavfile.read('audio/EN2002a_mix_headset_long_snippet.wav.wav')
 # fxpefac_peak(s, fs)
 fea = get_pitch_features(s, fs)
 
