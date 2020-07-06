@@ -1,23 +1,12 @@
 import numpy as np
 import math
 import matlab.engine
-import librosa.display
 from copy import deepcopy
 from weighted_graph import WeightedGraph
 from KalmanFilterHarmonic import KalmanFilterHarmonic as kf
 from GetSpec import GetSpec as GS
-import multiprocessing
-import time
+from scipy.io import wavfile
 
-
-class Timer:
-    def __init__(self):
-        self.time = time.time()
-
-    def lap(self, name):
-        now = time.time()
-        print(name + ': ' + str(now - self.time))
-        self.time = now
 
 def global_hypothesis(track_trees, t):
 
@@ -60,7 +49,7 @@ def global_hypothesis(track_trees, t):
     return MWIS_tracks
 
 
-def update_tracks((t, node_tracks, subsets, transition_model, R)):
+def update_tracks(t, node_tracks, subsets, transition_model, R):
     updated_tracks = []
 
     for track in node_tracks:
@@ -140,7 +129,7 @@ def harmonic_track_kalman_filter(list_subset):
             current_tracks = []
 
             for node_tracks in temp_tracks:
-                updated_tracks = update_tracks((t, node_tracks, subsets, transition_model, R))
+                updated_tracks = update_tracks(t, node_tracks, subsets, transition_model, R)
                 current_tracks = current_tracks + [updated_tracks]
 
 
@@ -225,8 +214,8 @@ def select_subsets(subsets):
     return best_subsets
 
 
-def find_subset((frame_freqs, frame_amps)):
-    possible_freqs_amps = [(frame_freqs[i], amp) for i, amp in enumerate(frame_amps) if amp > 0.0001e+09]
+def find_subset(frame_freqs, frame_amps, amp_min):
+    possible_freqs_amps = [(frame_freqs[i], amp) for i, amp in enumerate(frame_amps) if amp > amp_min]
     possible_subsets = []
     for (freq, amp) in possible_freqs_amps:
         n = 0
@@ -252,61 +241,48 @@ def find_subset((frame_freqs, frame_amps)):
 
 def get_pitch_features(samples, fs):
 
-    time = Timer()
-
     eng = matlab.engine.start_matlab()
     fx, tx, pv, amp = eng.gen_peak_track_large_array(
         matlab.double(list(samples)),
         matlab.double([fs]), nargout=4)
     eng.quit()
 
-    time.lap('matlab')
+    amp_min = 0.1e+06
+    file_extension = '_n'
 
-    p = multiprocessing.Pool(4)
-    list_allsubset = p.map(find_subset, zip(fx, amp))
+    list_allsubset = []
+    for idx in np.arange(0, len(fx)):
+        list_allsubset.append(find_subset(fx[idx], amp[idx], amp_min))
 
-    # list_allsubset_o = []
-    # for idx in np.arange(0, len(fx)):
-    #     list_allsubset_o.append(find_subset((fx[idx], amp[idx])))
-
-    time.lap('subsets')
-
-    # list_subset_o = []
-    # for idx in np.arange(0, len(fx)):
-    #     list_subset_o.append(select_subsets(list_allsubset[idx]))
-
-    list_subset = p.map(select_subsets, list_allsubset)
-
-    time.lap('selection')
+    list_subset = []
+    for idx in np.arange(0, len(fx)):
+        list_subset.append(select_subsets(list_allsubset[idx]))
 
     possible_tracks = harmonic_track_kalman_filter(list_subset)
 
-    time.lap('tracking')
-
     fea = np.zeros((len(fx), 26))
     for track in possible_tracks:
-        fx = [x[0][0] for x in track.get_past_states()]
+        freqs = [x[0][0] for x in track.get_past_states()]
         bins = np.linspace(50, 300, 26)
-        digitized = np.digitize(fx, bins)
+        digitized = np.digitize(freqs, bins)
         start_idx = track.get_start_index()
-        for index, t in enumerate(np.arange(start_idx, start_idx + len(fx))):
+        for index, t in enumerate(np.arange(start_idx, start_idx + len(freqs))):
             pitch_bin = digitized[index]
             fea[t][pitch_bin] = 1
 
-    time.lap('feature generation')
-
-    outfile_pdf = 'images/TS3003b_mix_headset_snippet.pdf'
+    outfile_pdf = 'images/TS3003b_mix_headset_snippet'
     spectrogram = GS()
-    spectrogram.plot_tracks(samples, outfile_pdf, possible_tracks, tx)
-    # spectrogram.plot_all(samples, outfile_pdf, [], [], fx, amp, list_subset, list_allsubset, tx)
 
-    time.lap('plot')
+    spectrogram.plot_wave(samples, fs, outfile_pdf + file_extension + '.pdf')
+    spectrogram.plot_peaks(samples, fs, outfile_pdf + '_peaks' + file_extension + '.pdf', fx, amp, tx, amp_min)
+    spectrogram.plot_list_allsubset(samples, fs, outfile_pdf + '_allsubset' + file_extension + '.pdf', list_allsubset, tx)
+    spectrogram.plot_list_allsubset(samples, fs, outfile_pdf + '_subset' + file_extension + '.pdf', list_subset, tx)
+    spectrogram.plot_tracks(samples, fs, outfile_pdf + '_tracks' + file_extension + '.pdf', possible_tracks, tx)
 
     return fea
 
 
-s, fs = librosa.load("audio/TS3003b_mix_headset_snippet.wav")
-# fs, s = wavfile.read('audio/EN2002a_mix_headset_long_snippet.wav.wav')
-# fxpefac_peak(s, fs)
+fs, s = wavfile.read('audio/TS3003b_mix_headset_snippet.wav')
 fea = get_pitch_features(s, fs)
+print(fea)
 

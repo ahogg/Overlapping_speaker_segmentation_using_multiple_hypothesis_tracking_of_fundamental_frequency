@@ -1,6 +1,5 @@
 import operator
 import random
-import multiprocessing
 from graph import Graph
 
 
