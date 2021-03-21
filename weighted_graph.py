@@ -1,3 +1,6 @@
+"""
+This file is based on code from:  https://github.com/jonperdomo/openmht
+"""
 import operator
 import random
 from graph import Graph
