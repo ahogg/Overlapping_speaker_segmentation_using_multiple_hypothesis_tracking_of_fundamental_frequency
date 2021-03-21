@@ -2,6 +2,8 @@
 A simple Python graph class, demonstrating the essential
 facts and functionalities of graphs.
 https://www.python-course.eu/graphs_python.php
+
+This file is based on code from:  https://github.com/jonperdomo/openmht
 """
 import numpy as np
 
