@@ -8,7 +8,7 @@ Please find a full table of results for 24 meetings on the AMI corpus here: [Res
 ## Citation
 
 Please use the following citation:
-
+https://ieeexplore.ieee.org/document/9381673
 ```bibtex
 @ARTICLE{Hogg2021,
   author={Aidan O. T. {Hogg} and Christine {Evers} and Alastair H. {Moore} and Patrick A. {Naylor}},
