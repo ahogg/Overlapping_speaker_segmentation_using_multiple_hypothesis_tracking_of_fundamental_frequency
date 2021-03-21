@@ -17,7 +17,8 @@ Please use the following citation:
   year={2021}}
 ```
 
-## References
+Please also consider citing the following papers whose code this project utilises:
+
 [1] C. Kim, F. Li, A. Ciptadi, and J. M. Rehg, “Multiple hypothesis tracking revisited,” in IEEE Intl. Conf. on Computer Vision (ICCV), Washington, DC, USA, 2015, pp. 4696–4704.
 
 [2] D. M. Brookes, “VOICEBOX: A speech processing toolbox for MATLAB,” 1997. [Online]. Available: http://www.ee.ic.ac.uk/hp/staff/dmb/voicebox/voicebox.html
