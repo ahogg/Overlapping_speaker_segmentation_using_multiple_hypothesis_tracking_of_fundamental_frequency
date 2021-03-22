@@ -11,10 +11,14 @@ Please use the following citation:
 https://ieeexplore.ieee.org/document/9381673
 ```bibtex
 @ARTICLE{Hogg2021,
-  author={Aidan O. T. {Hogg} and Christine {Evers} and Alastair H. {Moore} and Patrick A. {Naylor}},
+  author={A. O. T. {Hogg} and C. {Evers} and A. H. {Moore} and P. A. {Naylor}},
   journal={IEEE/ACM Transactions on Audio, Speech, and Language Processing}, 
-  title={Overlapping speaker segmentation using multiple hypothesis tracking of fundamental frequency},
-  year={2021}}
+  title={Overlapping speaker segmentation using multiple hypothesis tracking of fundamental frequency}, 
+  year={2021},
+  volume={},
+  number={},
+  pages={1-1},
+  doi={10.1109/TASLP.2021.3067161}}
 ```
 
 Please also consider citing the following papers whose code this project utilises:
